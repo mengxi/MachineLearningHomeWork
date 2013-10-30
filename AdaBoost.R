@@ -145,6 +145,9 @@ adaBoost = function(X, y)
   return( list(alpha = alpha, allPars = allPars) )
 }
 
+select_col = function(X, vec)
+{}
+
 # the main part:
 data = load('uspsdata.txt')
 cl   = load('uspscl.txt')
@@ -154,7 +157,7 @@ split = sample(1:n_block, n_data, replace=T)
 
 # run adaBoost for each split
 for(i in 1:n_block){
-  train_set = data[, (split != i)]
+  train_set = 
 }
 
 
