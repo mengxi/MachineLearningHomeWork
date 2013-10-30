@@ -104,7 +104,7 @@ classify = function(X, pars)
 
 # evaluate the bossting classifer on X
 # alpha: vector of voting weights
-# allPars: parameters of all weak learners
+# allPars: parameters of all weak learners, a list of list(j,m,theta)
 # return: c_hat = label of X under the boosting classifer
 agg_class = function(X, alpha, allPars)
 {
@@ -143,6 +143,40 @@ adaBoost = function(X, y)
   return( list(alpha = alpha, allPars = allPars) )
 }
 
+# return the error function
+errorRate = function(y1, y2, weight=NULL)
+{
+  if(weight == NULL) return sum( y1 != y2 ) / length(y1)
+  else return ( (y1 != y2) * weight ) / sum(weight)
+}
+
+
+# return the error vector  on adaBoost
+# test: list(X,y). (alpha, allPars): adaBoost parameters
+# return: error vector contains errors vs the learning stage
+adaBoostError = function(test, alpha, allPars)
+{
+  error_vec = c()
+  for(i in 1:length(alpha)){
+    classify_y = agg_class(test$X, alpha[1:i], allPars[1:i])
+    error_vec = c(error_vec, errorRate(test$y, classify_y))
+  }
+  return(error_vec)
+}
+
+# return the K-fold cross validation on adaBoost
+# data: list(X, y, split), split is a vector showing the data blocks
+# adaParsList: a list contains K adaPars, each is the classifer result of
+#              returned by adaBoost()
+# return: error vector contains errors vs the learning stage
+adaBoostFoldError = function(data, adaParsList)
+{
+  K = length(adaParsList)
+  for( i in 1:K){
+    
+  }
+}
+
 # select the corresponding columns in X, where vec is TRUE
 select_col = function(X, vec){
  return( t( subset(t(X), vec) ) )
@@ -162,8 +196,7 @@ for(i in 1:n_block){
   train_y = subset(cl, (split != i) )
   validate_x = select_col(data, (split == i) )
   validate_y = subset(cl, (split == i) )
-  ada_par = adaBoost(train_set, train_y)
-  result_pars = c(result_pars, ada_par)
+  result_pars = c(result_pars, adaBoost(train_set, train_y))
 }
 
 # evaluate and draw the error function
