@@ -7,7 +7,8 @@
 
 # using perceptron to find the classifer
 # X: data, one column one data sample, the first row must be ones
-# return: the final z
+# w: weights of data, y: labels of data
+# return: (z, classified_labels, objectFunc_value) 
 Perceptron = function(X, w, y)
 {
   d = nrow(X)
@@ -44,10 +45,7 @@ Perceptron = function(X, w, y)
     max = max - 1
   }
 
-  pars = list()
-  pars$z = z
-  pars$cfy = cfy(X,z)
-  pars$obj = obj(X,w,y,z)
+  pars = list(z = z, cfy = cfy(X,z), obj = obj(X,w,y,z))
 
   return(pars)
 
@@ -145,20 +143,30 @@ adaBoost = function(X, y)
   return( list(alpha = alpha, allPars = allPars) )
 }
 
-select_col = function(X, vec)
-{}
+# select the corresponding columns in X, where vec is TRUE
+select_col = function(X, vec){
+ return( t( subset(t(X), vec) ) )
+}
 
 # the main part:
 data = load('uspsdata.txt')
-cl   = load('uspscl.txt')
+cl   = as.vector(load('uspscl.txt'))
 n_block = 5
 n_data = ncol(data)
 split = sample(1:n_block, n_data, replace=T)
+result_pars = c()
 
 # run adaBoost for each split
 for(i in 1:n_block){
-  train_set = 
+  train_x = select_col(data, (split != i) )
+  train_y = subset(cl, (split != i) )
+  validate_x = select_col(data, (split == i) )
+  validate_y = subset(cl, (split == i) )
+  ada_par = adaBoost(train_set, train_y)
+  result_pars = c(result_pars, ada_par)
 }
+
+# evaluate and draw the error function
 
 
 
