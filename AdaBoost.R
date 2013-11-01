@@ -31,7 +31,7 @@ Perceptron = function(X, w, y)
     return( (w %*% error_vec)/sum(w) )
   }
 
-# calc the derivative of the object function
+# calc the derivative of the percept approximation function
   derivative = function(X, w, y, z){
     ob_y = cfy(X, z)
     error_vec = (ob_y != y)
@@ -137,7 +137,6 @@ adaBoost = function(X, y)
     allPars = c(allPars, cweak_par)
     
     w = w * exp( vote_wei * (y != weak_y) )
-
   }
 
   return( list(alpha = alpha, allPars = allPars) )
@@ -152,14 +151,16 @@ errorRate = function(y1, y2, weight=NULL)
 
 
 # return the error vector  on adaBoost
-# test: list(X,y). (alpha, allPars): adaBoost parameters
+# X_test: test data
+# y_test: labels of test data
+# (alpha, allPars): adaBoost parameters
 # return: error vector contains errors vs the learning stage
-adaBoostError = function(test, alpha, allPars)
+adaBoostError = function(X_test, y_test, alpha, allPars)
 {
   error_vec = c()
   for(i in 1:length(alpha)){
-    classify_y = agg_class(test$X, alpha[1:i], allPars[1:i])
-    error_vec = c(error_vec, errorRate(test$y, classify_y))
+    classify_y = agg_class(X_test, alpha[1:i], allPars[1:i])
+    error_vec = c(error_vec, errorRate(y_test, classify_y))
   }
   return(error_vec)
 }
@@ -172,34 +173,61 @@ adaBoostError = function(test, alpha, allPars)
 adaBoostFoldError = function(data, adaParsList)
 {
   K = length(adaParsList)
+  errorMat = matrix()
   for( i in 1:K){
-    
+    X_test = _Select_col(data$X, (data$split == i) )
+    y_test = subset(data$y, (data$split == i) )
+    alpha = adaParsList[i]$alpha
+    allPars = adaParsList[i]$allPars
+    errorMat = rbind(errorMat, 
+                     adaBoostError(X_test, y_test, alpha, allpars))
+  }
+  return( colMeans(errorMat) )
+}
+
+# run K fold adaBoost learn
+# data: list(X, y, split), split is a vector of 1,2,...K showing
+#        which data belongs to which group
+# return: a list contains K adaPars, each for one split
+adaBoostFoldLearn = function(data)
+{
+  result_pars = c()
+  K = max(data$split)
+# run adaBoost for each split
+  for(i in 1:K){
+    x_train = _Select_col(data$X, (split != i) )
+    y_train = subset(data$y, (split != i) )
+    result_pars = c(result_pars, adaBoost(x_train, y_train))
   }
 }
 
+# return the seperation of data into K groups
+_FoldSplit = function(X,y,K)
+{
+  split = sample(1:K, length(y), replace=T)
+  return list(X=X, y=y, split=split)
+}
+
 # select the corresponding columns in X, where vec is TRUE
-select_col = function(X, vec){
+_Select_col = function(X, vec){
  return( t( subset(t(X), vec) ) )
 }
 
 # the main part:
-data = load('uspsdata.txt')
-cl   = as.vector(load('uspscl.txt'))
-n_block = 5
-n_data = ncol(data)
-split = sample(1:n_block, n_data, replace=T)
-result_pars = c()
+_Main = function()
+{
+  K = 5
+  X = 
+  y = 
 
-# run adaBoost for each split
-for(i in 1:n_block){
-  train_x = select_col(data, (split != i) )
-  train_y = subset(cl, (split != i) )
-  validate_x = select_col(data, (split == i) )
-  validate_y = subset(cl, (split == i) )
-  result_pars = c(result_pars, adaBoost(train_set, train_y))
+  data = _FoldSplit(X,y,K)
+  adaPars_list = adaBoostFoldLearn(data)
+  errors = adaBoostFoldError(data, adaPars_list)
+  plot(1:length(errors), errors)
 }
 
-# evaluate and draw the error function
-
+#data = load('uspsdata.txt')
+#cl   = as.vector(load('uspscl.txt'))
+#n_block = 5
 
 
