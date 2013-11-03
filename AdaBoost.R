@@ -21,7 +21,7 @@ Perceptron = function(X, w, y)
 
 # the classifer
   cfy = function(X, z){
-    return sign( as.vector(z %*% X) )
+    return( sign( as.vector(z %*% X) ) )
   }
 
 # the result of the objective function
@@ -53,7 +53,11 @@ Perceptron = function(X, w, y)
 
 addone = function(X)
 {
-  ones = rep(1, ncol(X))
+  if(is.vector(X)) {
+    ones = rep(1, length(X))
+  } else { 
+    ones = rep(1, ncol(X)) 
+  }
   return(rbind(ones, X))
 }
 
@@ -145,8 +149,8 @@ adaBoost = function(X, y)
 # return the error function
 errorRate = function(y1, y2, weight=NULL)
 {
-  if(weight == NULL) return sum( y1 != y2 ) / length(y1)
-  else return ( (y1 != y2) * weight ) / sum(weight)
+  if(weight == NULL) return( sum( y1 != y2 ) / length(y1) )
+  else return( ( (y1 != y2) * weight ) / sum(weight) )
 }
 
 
@@ -175,7 +179,7 @@ adaBoostFoldError = function(data, adaParsList)
   K = length(adaParsList)
   errorMat = matrix()
   for( i in 1:K){
-    X_test = _Select_col(data$X, (data$split == i) )
+    X_test = Select_col(data$X, (data$split == i) )
     y_test = subset(data$y, (data$split == i) )
     alpha = adaParsList[i]$alpha
     allPars = adaParsList[i]$allPars
@@ -195,32 +199,32 @@ adaBoostFoldLearn = function(data)
   K = max(data$split)
 # run adaBoost for each split
   for(i in 1:K){
-    x_train = _Select_col(data$X, (split != i) )
-    y_train = subset(data$y, (split != i) )
+    x_train = Select_col(data$X, (data$split != i) )
+    y_train = subset(data$y, (data$split != i) )
     result_pars = c(result_pars, adaBoost(x_train, y_train))
   }
 }
 
 # return the seperation of data into K groups
-_FoldSplit = function(X,y,K)
+FoldSplit = function(X,y,K)
 {
   split = sample(1:K, length(y), replace=T)
-  return list(X=X, y=y, split=split)
+  return( list(X=X, y=y, split=split) )
 }
 
 # select the corresponding columns in X, where vec is TRUE
-_Select_col = function(X, vec){
+Select_col = function(X, vec){
  return( t( subset(t(X), vec) ) )
 }
 
 # the main part:
-_Main = function()
+Main = function(datafilename, datacl)
 {
   K = 5
-  X = 
-  y = 
+  X = read.table(datafilename) 
+  y = read.table(datacl)
 
-  data = _FoldSplit(X,y,K)
+  data = FoldSplit(X,y,K)
   adaPars_list = adaBoostFoldLearn(data)
   errors = adaBoostFoldError(data, adaPars_list)
   plot(1:length(errors), errors)
