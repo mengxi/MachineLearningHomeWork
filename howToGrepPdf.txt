@@ -1,0 +1,13 @@
+http://www.linuxjournal.com/video/searching-pdf-files-grep
+
+
+for i in *.pdf
+  do
+    echo $i
+    pdftotext "$i" - |grep Copyright
+done
+
+
+
+To install pdftotext:
+rpm -q --whatprovides /usr/bin/pdftotext
