@@ -1,4 +1,4 @@
-# Homework 3 of Statistical Machine Learning (W4400)
+# Homework 4 of Statistical Machine Learning (W4400)
 # Author : Mengxi Li
 # Time   : 2013/11/3
 
