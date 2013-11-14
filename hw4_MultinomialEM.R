@@ -52,3 +52,5 @@ hw3_main <- function()
   m <- MultinomialEM(H,K,tau)
   image(matrix(m, 200) )
 }
+
+hw3_main()
